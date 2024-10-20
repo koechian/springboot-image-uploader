@@ -1,0 +1,22 @@
+<html>
+
+<body>
+<h2>
+    Upload your file here
+</h2>
+<input type="file" name="file" id="file" />
+<button id="upload-button" onclick="uploadFile()">Upload</button>
+
+
+<script>
+    async function uploadFile() {
+        let formData = new FormData();
+        formData.append("media", document.getElementById("file").files[0]);
+        await fetch("http://localhost:8080/api/upload", {
+
+        method: "POST",
+        body: formData}).then((res)=>{res.text().then((data)=>{alert(data)})})}
+</script>
+
+</body>
+</html>

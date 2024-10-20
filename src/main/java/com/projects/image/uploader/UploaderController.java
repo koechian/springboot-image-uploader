@@ -1,35 +1,32 @@
 package com.projects.image.uploader;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.UUID;
 
+@Validated
 @RestController
 public class UploaderController {
 
     private HashMap<String, Media> db = new HashMap<>(){{
-        put("1",new Media("1","myphoto.jpg"));
-        put("2",new Media("2","myphoto2.jpg"));
+        put("1",new Media("1","photo.jpg"));
+        put("2",new Media("2","photo1.jpg"));
     }};
 
-    @GetMapping("/hello")
-    public String hello(){
-        return "Hello World!";
-    }
-
-    @GetMapping("/api/upload")
+    @GetMapping("/api/getAll")
     public Collection<Media> get(){
         return db.values();
     }
 
-    @GetMapping("/api/upload/{id}")
+    @GetMapping("/api/getOne/{id}")
     public Media get(@PathVariable String id){
         Media media = db.get(id);
 
@@ -38,12 +35,28 @@ public class UploaderController {
     }
 
     @DeleteMapping("/api/delete/{id}")
-    public Collection<Media> delete(@PathVariable String id){
+    public Collection<Media> delete(@PathVariable @Valid String id){
         Media media = db.remove(id);
 
         if (media == null)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
         return db.values();
+
+    }
+
+
+    @PostMapping("/api/upload")
+    public Media upload(@RequestPart("media") MultipartFile file) throws IOException  {
+
+        Media media = new Media(UUID.randomUUID().toString(),file.getOriginalFilename());
+
+
+        media.setMediaData(file.getBytes());
+
+        db.put(media.getId(), media);
+
+
+        return media;
 
     }
 }
